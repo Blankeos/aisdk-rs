@@ -54,6 +54,40 @@ macro_rules! generate_language_model_tests {
         skip_streaming: $skip_streaming:tt,
         skip_embedding: $skip_embedding:tt
     ) => {
+        generate_language_model_tests!(
+            provider: $provider_type,
+            api_key_var: $env_key,
+            model_struct: $model_struct,
+            default_model: $default_model,
+            tool_model: $tool_model,
+            structured_output_model: $structured_output_model,
+            reasoning_model: $reasoning_model,
+            embedding_model: $embedding_model,
+            skip_reasoning: $skip_reasoning,
+            skip_tool: $skip_tool,
+            skip_structured_output: $skip_structured_output,
+            skip_streaming: $skip_streaming,
+            skip_embedding: $skip_embedding,
+            allow_empty_api_key: false
+        );
+    };
+
+    (
+        provider: $provider_type:ident,
+        api_key_var: $env_key:expr,
+        model_struct: $model_struct:ident,
+        default_model: $default_model:expr,
+        tool_model: $tool_model:expr,
+        structured_output_model: $structured_output_model:expr,
+        reasoning_model: $reasoning_model:expr,
+        embedding_model: $embedding_model:expr,
+        skip_reasoning: $skip_reasoning:tt,
+        skip_tool: $skip_tool:tt,
+        skip_structured_output: $skip_structured_output:tt,
+        skip_streaming: $skip_streaming:tt,
+        skip_embedding: $skip_embedding:tt,
+        allow_empty_api_key: $allow_empty_api_key:tt
+    ) => {
         use aisdk::core::tools::ToolExecute;
         use aisdk::core::{
             DynamicModel, LanguageModelRequest, LanguageModelStreamChunkType, Message,
@@ -79,7 +113,7 @@ macro_rules! generate_language_model_tests {
         }
 
         // Generate all standard test categories
-        generate_provider_has_default_interface!($provider_type, $model_struct);
+        generate_provider_has_default_interface!($provider_type, $model_struct, $allow_empty_api_key);
         generate_basic_tests!($default_model);
         generate_language_model_stop_reason_tests!($default_model);
         generate_language_model_hook_tests!($tool_model);
@@ -94,7 +128,7 @@ macro_rules! generate_language_model_tests {
 
 // Test to ensure all providers have the default provider settings builder interface
 macro_rules! generate_provider_has_default_interface {
-    ($provider_type:ident, $model_struct:ident) => {
+    ($provider_type:ident, $model_struct:ident, $allow_empty_api_key:tt) => {
         #[tokio::test]
         async fn test_provider_has_default_interface() {
             let provider = $provider_type::<$model_struct>::builder()
@@ -132,11 +166,15 @@ macro_rules! generate_provider_has_default_interface {
                 .base_url("http://localhost:8080/".to_string())
                 .build();
 
-            assert!(provider3.is_err());
-            assert_eq!(
-                provider3.unwrap_err().to_string(),
-                "A required field is missing: api_key"
-            );
+            if $allow_empty_api_key {
+                assert!(provider3.is_ok());
+            } else {
+                assert!(provider3.is_err());
+                assert_eq!(
+                    provider3.unwrap_err().to_string(),
+                    "A required field is missing: api_key"
+                );
+            }
 
             // should have model_name() method for dynamic model
             let _provider_dynamic = $provider_type::model_name("test-model".to_string());

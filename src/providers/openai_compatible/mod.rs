@@ -12,7 +12,7 @@
 //!
 //! let provider = OpenAICompatible::<DynamicModel>::builder()
 //!     .base_url("https://api.z.ai/api/coding/paas/v4")
-//!     .api_key("your-api-key")
+//!     // .api_key("your-api-key") // optional for local/public endpoints
 //!     .model_name("glm-4.5")
 //!     .build()
 //!     .unwrap();
@@ -23,7 +23,6 @@ pub mod embedding_model;
 pub mod language_model;
 pub mod settings;
 
-use crate::Error;
 use crate::core::DynamicModel;
 use crate::core::capabilities::ModelName;
 use crate::core::utils::validate_base_url;
@@ -176,11 +175,6 @@ impl<M: ModelName> OpenAICompatibleBuilder<M> {
     pub fn build(mut self) -> Result<OpenAICompatible<M>> {
         // validate base url
         let base_url = validate_base_url(&self.settings.base_url)?;
-
-        // check api key exists
-        if self.settings.api_key.is_empty() {
-            return Err(Error::MissingField("api_key".to_string()));
-        }
 
         // Update the inner provider with the validated base_url
         self.inner.settings.base_url = base_url.to_string();

@@ -28,13 +28,15 @@ impl<M: ModelName> LanguageModelClient for OpenAI<M> {
         // Default headers
         let mut default_headers = reqwest::header::HeaderMap::new();
         default_headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
-        // Authorization
-        default_headers.insert(
-            "Authorization",
-            format!("Bearer {}", self.settings.api_key.clone())
-                .parse()
-                .unwrap(),
-        );
+        // Authorization (optional)
+        if !self.settings.api_key.is_empty() {
+            default_headers.insert(
+                "Authorization",
+                format!("Bearer {}", self.settings.api_key.clone())
+                    .parse()
+                    .unwrap(),
+            );
+        }
 
         default_headers
     }
@@ -105,13 +107,15 @@ impl<M: ModelName> EmbeddingClient for OpenAI<M> {
         // Default headers
         let mut default_headers = reqwest::header::HeaderMap::new();
         default_headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
-        // Authorization
-        default_headers.insert(
-            "Authorization",
-            format!("Bearer {}", self.settings.api_key.clone())
-                .parse()
-                .unwrap(),
-        );
+        // Authorization (optional)
+        if !self.settings.api_key.is_empty() {
+            default_headers.insert(
+                "Authorization",
+                format!("Bearer {}", self.settings.api_key.clone())
+                    .parse()
+                    .unwrap(),
+            );
+        }
 
         default_headers
     }

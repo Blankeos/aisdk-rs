@@ -19,5 +19,6 @@ generate_language_model_tests!(
     skip_tool: false,
     skip_structured_output: false,
     skip_streaming: false,
-    skip_embedding: false
+    skip_embedding: false,
+    allow_empty_api_key: true
 );

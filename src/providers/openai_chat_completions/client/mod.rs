@@ -27,10 +27,13 @@ impl<M: ModelName> LanguageModelClient for OpenAIChatCompletions<M> {
     fn headers(&self) -> reqwest::header::HeaderMap {
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(CONTENT_TYPE, "application/json".parse().unwrap());
-        headers.insert(
-            "Authorization",
-            format!("Bearer {}", self.settings.api_key).parse().unwrap(),
-        );
+
+        if !self.settings.api_key.is_empty() {
+            headers.insert(
+                "Authorization",
+                format!("Bearer {}", self.settings.api_key).parse().unwrap(),
+            );
+        }
         headers
     }
 
